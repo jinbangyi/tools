@@ -86,9 +86,9 @@ def compare_collection(source: Database, target: Database):
 
 
 @click.command()
-@click.argument('source', type=str, required=True, help='mongodb://user:passwd@host/db?params=1')
-@click.argument('target', type=str, required=True, help='mongodb://user:passwd@host/db?params=1')
-@click.option('--db', type=str, help='if db is empty, will compare all db')
+@click.argument('source', type=str, required=True)
+@click.argument('target', type=str, required=True)
+@click.option('--db', type=str)
 def start(source: str, target: str, db: str):
     mongo_source = MongoClient(source)
     mongo_target = MongoClient(target)
