@@ -50,8 +50,9 @@ def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] =
 
 def compare_collection(source: Database, target: Database):
     global exit_code
-    source_collections = sorted(source.list_collection_names())
-    target_collections = sorted(target.list_collection_names())
+
+    source_collections = sorted(filter(lambda item: not item.startswith('awsdms_'), source.list_collection_names()))
+    target_collections = sorted(filter(lambda item: not item.startswith('awsdms_'), target.list_collection_names()))
     collection_diff = DeepDiff(source_collections, target_collections)
     logger.debug(f'source collections {source_collections}')
 
@@ -100,8 +101,8 @@ def start(source: str, target: str, db: str):
     mongo_target = MongoClient(target)
     ignored_db = ['admin', 'config', 'local']
 
-    compare_db(mongo_source, mongo_target, ignored_db=ignored_db)
     if not db:
+        compare_db(mongo_source, mongo_target, ignored_db=ignored_db)
         for _db in filter(lambda item: item not in ignored_db, mongo_source.list_database_names()):
             compare_collection(mongo_source.get_database(_db), mongo_target.get_database(_db))
     else:
