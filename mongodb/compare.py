@@ -23,8 +23,8 @@ def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] =
     logger.debug(f'source dbs {source_dbs}')
 
     db_diff = DeepDiff(
-        [i['name'] for i in source_dbs],
-        [i['name'] for i in target_dbs],
+        sorted([i['name'] for i in source_dbs]),
+        sorted([i['name'] for i in target_dbs]),
     )
     if db_diff:
         logger.info(f'db-diff: {db_diff}')
@@ -39,8 +39,8 @@ def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] =
 
 
 def compare_collection(source: Database, target: Database):
-    source_collections = list(source.list_collection_names())
-    target_collections = list(target.list_collection_names())
+    source_collections = sorted(source.list_collection_names())
+    target_collections = sorted(target.list_collection_names())
     collection_diff = DeepDiff(source_collections, target_collections)
     logger.debug(f'source collections {source_collections}')
 
