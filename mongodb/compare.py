@@ -5,55 +5,82 @@ from deepdiff import DeepDiff
 from loguru import logger
 
 
+def size_compare(source: dict, target: dict, gap: int):
+    new_source = {}
+    new_target = {}
+    for k in source.keys():
+        if k in target:
+            if abs(source.get(k) - target.get(k)) > gap:
+                new_source[k] = source.get(k)
+                new_target = target.get(k)
+
+    return new_target, new_target
+
+
 def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] = None):
-    source_dbs = list(source.list_databases())
-    target_dbs = list(target.list_databases())
+    source_dbs = list(filter(lambda item: item not in ignored_db, source.list_databases()))
+    target_dbs = list(filter(lambda item: item not in ignored_db, target.list_databases()))
+    logger.debug(f'source dbs {source_dbs}')
 
     db_diff = DeepDiff(
-        filter(lambda item: item not in ignored_db, [i['name'] for i in source_dbs]),
-        filter(lambda item: item not in ignored_db, [i['name'] for i in target_dbs]),
+        [i['name'] for i in source_dbs],
+        [i['name'] for i in target_dbs],
     )
-    logger.info(f'db-diff: {db_diff}')
-    size_diff = DeepDiff(
-        filter(lambda item: item not in ignored_db, [i['sizeOnDisk'] for i in source_dbs]),
-        filter(lambda item: item not in ignored_db, [i['sizeOnDisk'] for i in target_dbs]),
-    )
-    logger.info(f'db-size-diff: {size_diff}')
+    if not db_diff:
+        logger.info(f'db-diff: {db_diff}')
+
+    size_diff = DeepDiff(*size_compare(
+        dict([(i['name'], i['sizeOnDisk']) for i in source_dbs]),
+        dict([(i['name'], i['sizeOnDisk']) for i in target_dbs]),
+        1024*1024
+    ))
+    if not size_diff:
+        logger.info(f'db-size-diff: {size_diff}')
 
 
 def compare_collection(source: Database, target: Database):
     source_collections = list(source.list_collection_names())
     target_collections = list(target.list_collection_names())
     collection_diff = DeepDiff(source_collections, target_collections)
-    logger.info(f'collection-diff: {collection_diff}')
+    logger.debug(f'source collections {source_collections}')
+
+    if not collection_diff:
+        logger.info(f'collection-diff: {collection_diff}')
 
     source_status = dict([(i, source.command('collStats', i)) for i in source_collections])
     target_status = dict([(i, source.command('collStats', i)) for i in target_collections])
 
-    collection_size_diff = DeepDiff(
+    collection_size_diff = DeepDiff(*size_compare(
         dict([(k, v['size']) for k, v in source_status.items()]),
         dict([(k, v['size']) for k, v in target_status.items()]),
-    )
-    logger.info(f'collection-size-diff: {collection_size_diff}')
+        1024 * 1024
+    ))
+    if not collection_size_diff:
+        logger.info(f'collection-size-diff: {collection_size_diff}')
 
-    collection_count_diff = DeepDiff(
+    collection_count_diff = DeepDiff(*size_compare(
         dict([(k, v['count']) for k, v in source_status.items()]),
         dict([(k, v['count']) for k, v in target_status.items()]),
-    )
-    logger.info(f'collection-count-diff: {collection_count_diff}')
+        100
+    ))
+    if not collection_count_diff:
+        logger.info(f'collection-count-diff: {collection_count_diff}')
 
     # compare indices
-    collection_index_size_diff = DeepDiff(
+    collection_index_size_diff = DeepDiff(*size_compare(
         dict([(k, v['totalIndexSize']) for k, v in source_status.items()]),
         dict([(k, v['totalIndexSize']) for k, v in target_status.items()]),
-    )
-    logger.info(f'collection-totalIndexSize-diff: {collection_index_size_diff}')
+        1024*1024
+    ))
+    if not collection_index_size_diff:
+        logger.info(f'collection-totalIndexSize-diff: {collection_index_size_diff}')
 
     collection_index_diff = DeepDiff(
         dict([(k, v['indexSizes'].keys()) for k, v in source_status.items()]),
         dict([(k, v['indexSizes'].keys()) for k, v in target_status.items()]),
     )
-    logger.info(f'collection-index-diff: {collection_index_diff}')
+    if not collection_index_diff:
+        logger.info(f'collection-index-diff: {collection_index_diff}')
 
     # TODO index diff of each indices
 
