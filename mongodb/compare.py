@@ -47,7 +47,7 @@ def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] =
     size_diff = DeepDiff(*size_compare(
         dict([(i['name'], i['sizeOnDisk']) for i in source_dbs]),
         dict([(i['name'], i['sizeOnDisk']) for i in target_dbs]),
-        1024*1024
+        1024*1024*10
     ))
     log('db-size-diff', size_diff)
 
