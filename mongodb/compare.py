@@ -4,7 +4,6 @@ from pymongo.database import Database
 from deepdiff import DeepDiff
 from loguru import logger
 
-
 exit_code = 0
 
 
@@ -47,7 +46,7 @@ def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] =
     size_diff = DeepDiff(*size_compare(
         dict([(i['name'], i['sizeOnDisk']) for i in source_dbs]),
         dict([(i['name'], i['sizeOnDisk']) for i in target_dbs]),
-        1024*1024*10
+        1024 * 1024 * 500  # 500Mi
     ))
     log('db-size-diff', size_diff)
 
@@ -83,7 +82,7 @@ def compare_collection(source: Database, target: Database):
     collection_index_size_diff = DeepDiff(*size_compare(
         dict([(k, v['totalIndexSize']) for k, v in source_status.items()]),
         dict([(k, v['totalIndexSize']) for k, v in target_status.items()]),
-        1024*1024
+        1024 * 1024
     ))
     log('collection-totalIndexSize-diff', collection_index_size_diff)
 
