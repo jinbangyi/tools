@@ -22,9 +22,13 @@ def size_compare(source: dict, target: dict, gap: int):
         if k in target:
             if abs(source.get(k) - target.get(k)) > gap:
                 new_source[k] = source.get(k)
-                new_target = target.get(k)
+                new_target[k] = target.get(k)
+        else:
+            new_source[k] = source.get(k)
 
-    return new_target, new_target
+    [new_target.setdefault(i, target.get(i)) for i in set(target.keys()) - set(source.keys())]
+
+    return new_source, new_target
 
 
 def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] = None):
