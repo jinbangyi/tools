@@ -18,8 +18,8 @@ def size_compare(source: dict, target: dict, gap: int):
 
 
 def compare_db(source: MongoClient, target: MongoClient, ignored_db: list[str] = None):
-    source_dbs = list(filter(lambda item: item not in ignored_db, source.list_databases()))
-    target_dbs = list(filter(lambda item: item not in ignored_db, target.list_databases()))
+    source_dbs = list(filter(lambda item: item['name'] not in ignored_db, source.list_databases()))
+    target_dbs = list(filter(lambda item: item['name'] not in ignored_db, target.list_databases()))
     logger.debug(f'source dbs {source_dbs}')
 
     db_diff = DeepDiff(
