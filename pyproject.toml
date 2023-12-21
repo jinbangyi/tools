@@ -14,6 +14,8 @@ pymongo = "^4.6.1"
 deepdiff = "^6.7.1"
 psycopg2 = "^2.9.9"
 humanfriendly = "^10.0"
+pymysql = "^1.1.0"
+sqlalchemy = "^2.0.23"
 
 
 [build-system]

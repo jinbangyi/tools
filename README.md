@@ -8,3 +8,5 @@ benny tools
 - compare indices size and diff
 - compare collections size and diff
 - compare db size and diff
+
+TODO internal common tools
