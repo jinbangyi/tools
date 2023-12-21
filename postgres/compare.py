@@ -103,17 +103,17 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
             # Get all schemas
             _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
             _schemas = [row[0] for row in _cursor2.fetchall()]
-            logger.debug(f'schemas: {_databases}')
+            logger.debug(f'schemas: {_schemas}')
             schemas[db] = sorted(_schemas)
 
             for schema in _schemas:
                 # Get all tables
                 _cursor2.execute(f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}'")
                 _tables = [row[0] for row in _cursor2.fetchall()]
+                logger.debug(f'tables: {_tables}')
                 tables[f'{db}-{schema}'] = sorted(_tables)
 
                 for table in _tables:
-                    logger.debug(f'tables: {_databases}')
                     _cursor2.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{table}'))")
                     table_size = _cursor2.fetchone()[0]
                     tables_size[f'{db}-{schema}-{table}'] = table_size
