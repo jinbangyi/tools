@@ -1,4 +1,5 @@
 import click
+import humanfriendly
 import psycopg2
 # from psycopg2 import connection
 from deepdiff import DeepDiff
@@ -100,7 +101,7 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
 
             _cursor2.execute(f"SELECT pg_size_pretty(pg_database_size('{db}'))")
             _size = _cursor2.fetchone()[0]
-            databases[db] = _size
+            databases[db] = humanfriendly.parse_size(_size)
 
             # Get all schemas
             # _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
@@ -119,7 +120,7 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                 for table in _tables:
                     _cursor2.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{table}'))")
                     table_size = _cursor2.fetchone()[0]
-                    tables_size[f'{db}-{schema}-{table}'] = table_size
+                    tables_size[f'{db}-{schema}-{table}'] = humanfriendly.parse_size(table_size)
 
                     # Get all indices for each table
                     _cursor2.execute(
