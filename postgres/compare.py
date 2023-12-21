@@ -85,15 +85,16 @@ def get_postgresql_info(conn, ignored_db: list[str] = None):
         # Get all databases
         _cursor.execute("SELECT datname FROM pg_database")
         _databases = sorted(filter(lambda item: item not in ignored_db, [row[0] for row in _cursor.fetchall()]))
+        _cursor.close()
 
         for db in _databases:
-            _cursor.execute(f"SELECT pg_size_pretty(pg_database_size('{db}'))")
-            _size = _cursor.fetchone()[0]
-            databases[db] = _size
-
             # Connect to a specific database
             conn.set_session(database=db)
             _cursor2 = conn.cursor()
+
+            _cursor2.execute(f"SELECT pg_size_pretty(pg_database_size('{db}'))")
+            _size = _cursor2.fetchone()[0]
+            databases[db] = _size
 
             # Get all schemas
             _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
@@ -122,7 +123,6 @@ def get_postgresql_info(conn, ignored_db: list[str] = None):
 
     finally:
         # Close the cursor and connection
-        _cursor.close()
         conn.close()
 
     return databases, schemas, tables, tables_size, indices
