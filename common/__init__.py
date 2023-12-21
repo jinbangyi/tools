@@ -8,7 +8,7 @@ def log(msg: str, obj, pretty: bool = False):
     global exit_code
     if obj:
         if pretty:
-            for k, v in obj['values_changed'].items():
+            for k, v in obj.get('values_changed', {}).items():
                 v['new_value'] = round(v['new_value'] / pow(1024, 3), 2)
                 v['old_value'] = round(v['old_value'] / pow(1024, 3), 2)
                 v['delta'] = round(abs(v['new_value'] - v['old_value']), 2)
