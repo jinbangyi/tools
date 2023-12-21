@@ -5,14 +5,20 @@ import psycopg2
 from deepdiff import DeepDiff
 from loguru import logger
 
-
 exit_code = 0
 
 
-def log(msg: str, obj):
+def log(msg: str, obj, pretty: bool = False):
     global exit_code
     if obj:
-        logger.info(f'{msg}: {obj}')
+        if pretty:
+            for k, v in obj['values_changed'].items():
+                v['new_value'] = v['new_value'] / pow(1024, 3)
+                v['old_value'] = v['old_value'] / pow(1024, 3)
+                v['delta'] = abs(v['new_value'] - v['old_value'])
+        # if pretty == 'bytes':
+        #     obj = obj / pow(1024, 3)
+        logger.info(f'{msg}: {obj}G')
         exit_code += 1
 
 
@@ -50,8 +56,8 @@ def start(source: str, target: str, db: str):
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
         t_databases,
-        1024*1024*500
-    )))
+        1024 * 1024 * 500
+    )), pretty=True)
 
     log('db-schema-diff', DeepDiff(
         s_schemas,
@@ -66,8 +72,8 @@ def start(source: str, target: str, db: str):
     log('db-table-size-diff', DeepDiff(*size_compare(
         s_tables_size,
         t_tables_size,
-        1024*1024*100
-    )))
+        1024 * 1024 * 100
+    )), pretty=True)
 
     log('db-indices-diff', DeepDiff(
         s_indices,
