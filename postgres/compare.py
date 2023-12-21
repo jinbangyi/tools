@@ -13,8 +13,8 @@ def log(msg: str, obj, pretty: bool = False):
     if obj:
         if pretty:
             for k, v in obj['values_changed'].items():
-                v['new_value'] = v['new_value'] / pow(1024, 3)
-                v['old_value'] = v['old_value'] / pow(1024, 3)
+                v['new_value'] = round(v['new_value'] / pow(1024, 3), 2)
+                v['old_value'] = round(v['old_value'] / pow(1024, 3), 2)
                 v['delta'] = abs(v['new_value'] - v['old_value'])
         # if pretty == 'bytes':
         #     obj = obj / pow(1024, 3)
