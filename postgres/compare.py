@@ -101,9 +101,10 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
             databases[db] = _size
 
             # Get all schemas
-            _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
-            _schemas = [row[0] for row in _cursor2.fetchall()]
-            logger.debug(f'schemas: {_schemas}')
+            # _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
+            # _schemas = [row[0] for row in _cursor2.fetchall()]
+            # logger.debug(f'schemas: {_schemas}')
+            _schemas = ['public']
             schemas[db] = sorted(_schemas)
 
             for schema in _schemas:
