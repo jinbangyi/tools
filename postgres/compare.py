@@ -1,3 +1,5 @@
+import sys
+
 import click
 import humanfriendly
 import psycopg2
@@ -41,11 +43,12 @@ def size_compare(source: dict, target: dict, gap: int):
 @click.command()
 @click.argument('source', type=str, required=True)
 @click.argument('target', type=str, required=True)
-@click.option('--db', type=str)
-def start(source: str, target: str, db: str):
+@click.option('--level', type=str, default='DEBUG')
+def start(source: str, target: str, level: str):
     # source_client = psycopg2.connect(source)
     # target_client = psycopg2.connect(target)
-
+    logger.remove(0)  # remove default handler
+    logger.add(sys.stderr, level=level.upper(), backtrace=False, diagnose=False)
     ignored_db = ['postgres', 'template0', 'template1', 'rdsadmin']
 
     s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
