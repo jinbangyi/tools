@@ -39,7 +39,7 @@ def start(source: str, target: str, db: str):
     # source_client = psycopg2.connect(source)
     # target_client = psycopg2.connect(target)
 
-    ignored_db = ['postgres', 'template0', 'template1']
+    ignored_db = ['postgres', 'template0', 'template1', 'rdsadmin']
 
     s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
     t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target, ignored_db=ignored_db)
@@ -91,7 +91,7 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
         logger.debug(f'dbs: {_databases}')
 
         for db in _databases:
-            conn = psycopg2.connect(conn_str, database=db, dbname=db)
+            conn = psycopg2.connect(conn_str, dbname=db)
             # Connect to a specific database
             # conn.set_session(database=db)
             _cursor2 = conn.cursor()
