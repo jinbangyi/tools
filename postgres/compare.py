@@ -36,13 +36,13 @@ def size_compare(source: dict, target: dict, gap: int):
 @click.argument('target', type=str, required=True)
 @click.option('--db', type=str)
 def start(source: str, target: str, db: str):
-    source_client = psycopg2.connect(source)
-    target_client = psycopg2.connect(target)
+    # source_client = psycopg2.connect(source)
+    # target_client = psycopg2.connect(target)
 
     ignored_db = ['postgres', 'template0', 'template1']
 
-    s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source_client, ignored_db=ignored_db)
-    t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target_client, ignored_db=ignored_db)
+    s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
+    t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target, ignored_db=ignored_db)
 
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
@@ -72,8 +72,9 @@ def start(source: str, target: str, db: str):
     ))
 
 
-def get_postgresql_info(conn, ignored_db: list[str] = None):
+def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
     # Create a cursor
+    conn = psycopg2.connect(conn_str)
     _cursor = conn.cursor()
 
     databases = {}
@@ -86,8 +87,10 @@ def get_postgresql_info(conn, ignored_db: list[str] = None):
         _cursor.execute("SELECT datname FROM pg_database")
         _databases = sorted(filter(lambda item: item not in ignored_db, [row[0] for row in _cursor.fetchall()]))
         _cursor.close()
+        conn.close()
 
         for db in _databases:
+            conn = psycopg2.connect(conn_str)
             # Connect to a specific database
             conn.set_session(database=db)
             _cursor2 = conn.cursor()
@@ -120,10 +123,12 @@ def get_postgresql_info(conn, ignored_db: list[str] = None):
                     indices[f'{db}-{schema}-{table}'] = sorted(_indices)
 
             _cursor2.close()
+            conn.close()
 
     finally:
         # Close the cursor and connection
-        conn.close()
+        # conn.close()
+        pass
 
     return databases, schemas, tables, tables_size, indices
 
