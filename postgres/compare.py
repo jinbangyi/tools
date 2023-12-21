@@ -44,13 +44,13 @@ def start(source: str, target: str, db: str):
 
     s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
     t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target, ignored_db=ignored_db)
-    logger.debug(f'{s_databases}, {s_schemas}, {s_tables}, {s_tables_size}, {s_indices}')
-    logger.debug(f'{t_databases}, {t_schemas}, {t_tables}, {t_tables_size}, {t_indices}')
+    # logger.debug(f'{s_databases}, {s_schemas}, {s_tables}, {s_tables_size}, {s_indices}')
+    # logger.debug(f'{t_databases}, {t_schemas}, {t_tables}, {t_tables_size}, {t_indices}')
 
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
         t_databases,
-        1024*1024
+        1024*1024*500
     )))
 
     log('db-schema-diff', DeepDiff(
@@ -66,7 +66,7 @@ def start(source: str, target: str, db: str):
     log('db-table-size-diff', DeepDiff(*size_compare(
         s_tables_size,
         t_tables_size,
-        1024*1024
+        1024*1024*100
     )))
 
     log('db-indices-diff', DeepDiff(
@@ -118,6 +118,9 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                 tables[f'{db}-{schema}'] = sorted(_tables)
 
                 for table in _tables:
+                    if str(table).startswith('awsdms'):
+                        continue
+
                     _cursor2.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{table}'))")
                     table_size = _cursor2.fetchone()[0]
                     tables_size[f'{db}-{schema}-{table}'] = humanfriendly.parse_size(table_size)
