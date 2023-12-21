@@ -88,9 +88,10 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
         _databases = sorted(filter(lambda item: item not in ignored_db, [row[0] for row in _cursor.fetchall()]))
         _cursor.close()
         conn.close()
+        logger.debug(f'dbs: {_databases}')
 
         for db in _databases:
-            conn = psycopg2.connect(conn_str, database=db)
+            conn = psycopg2.connect(conn_str, database=db, dbname=db)
             # Connect to a specific database
             # conn.set_session(database=db)
             _cursor2 = conn.cursor()
