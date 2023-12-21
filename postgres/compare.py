@@ -43,6 +43,8 @@ def start(source: str, target: str, db: str):
 
     s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
     t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target, ignored_db=ignored_db)
+    logger.debug(f'{s_databases}, {s_schemas}, {s_tables}, {s_tables_size}, {s_indices}')
+    logger.debug(f'{t_databases}, {t_schemas}, {t_tables}, {t_tables_size}, {t_indices}')
 
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
@@ -123,7 +125,7 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                     _cursor2.execute(
                         f"SELECT indexname FROM pg_indexes WHERE schemaname = '{schema}' AND tablename = '{table}'")
                     _indices = [row[0] for row in _cursor2.fetchall()]
-                    print(f"\nIndices for table '{table}':", _indices)
+                    # print(f"\nIndices for table '{table}':", _indices)
                     indices[f'{db}-{schema}-{table}'] = sorted(_indices)
 
             _cursor2.close()
