@@ -90,9 +90,9 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
         conn.close()
 
         for db in _databases:
-            conn = psycopg2.connect(conn_str)
+            conn = psycopg2.connect(conn_str, database=db)
             # Connect to a specific database
-            conn.set_session(database=db)
+            # conn.set_session(database=db)
             _cursor2 = conn.cursor()
 
             _cursor2.execute(f"SELECT pg_size_pretty(pg_database_size('{db}'))")
