@@ -18,7 +18,7 @@ def start(source: str, target: str, level: str):
     logger.remove(0)  # remove default handler
     logger.add(sys.stderr, level=level.upper(), backtrace=False, diagnose=False)
     # ignored_db = ['postgres', 'template0', 'template1', 'rdsadmin']
-    ignored_db = ['information_schema', 'mysql', 'performance_schema', 'sys']
+    ignored_db = ['information_schema', 'mysql', 'performance_schema', 'sys', 'awsdms_control']
 
     s_databases, s_tables, s_indices = get_mysql_info(source, ignored_db=ignored_db)
     t_databases, t_tables, t_indices = get_mysql_info(target, ignored_db=ignored_db)
