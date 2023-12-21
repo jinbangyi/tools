@@ -1,6 +1,6 @@
 import click
 import psycopg2
-from psycopg2 import connection
+# from psycopg2 import connection
 from deepdiff import DeepDiff
 from loguru import logger
 
@@ -72,7 +72,7 @@ def start(source: str, target: str, db: str):
     ))
 
 
-def get_postgresql_info(conn: connection, ignored_db: list[str] = None):
+def get_postgresql_info(conn, ignored_db: list[str] = None):
     # Create a cursor
     _cursor = conn.cursor()
 
@@ -93,29 +93,32 @@ def get_postgresql_info(conn: connection, ignored_db: list[str] = None):
 
             # Connect to a specific database
             conn.set_session(database=db)
+            _cursor2 = conn.cursor()
 
             # Get all schemas
-            _cursor.execute("SELECT schema_name FROM information_schema.schemata")
-            _schemas = [row[0] for row in _cursor.fetchall()]
+            _cursor2.execute("SELECT schema_name FROM information_schema.schemata")
+            _schemas = [row[0] for row in _cursor2.fetchall()]
             schemas[db] = sorted(_schemas)
 
             for schema in _schemas:
                 # Get all tables
-                _cursor.execute(f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}'")
-                _tables = [row[0] for row in _cursor.fetchall()]
+                _cursor2.execute(f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}'")
+                _tables = [row[0] for row in _cursor2.fetchall()]
                 tables[f'{db}-{schema}'] = sorted(_tables)
 
                 for table in _tables:
-                    _cursor.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{table}'))")
-                    table_size = _cursor.fetchone()[0]
+                    _cursor2.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{table}'))")
+                    table_size = _cursor2.fetchone()[0]
                     tables_size[f'{db}-{schema}-{table}'] = table_size
 
                     # Get all indices for each table
-                    _cursor.execute(
+                    _cursor2.execute(
                         f"SELECT indexname FROM pg_indexes WHERE schemaname = '{schema}' AND tablename = '{table}'")
-                    _indices = [row[0] for row in _cursor.fetchall()]
+                    _indices = [row[0] for row in _cursor2.fetchall()]
                     print(f"\nIndices for table '{table}':", _indices)
                     indices[f'{db}-{schema}-{table}'] = sorted(_indices)
+
+            _cursor2.close()
 
     finally:
         # Close the cursor and connection
