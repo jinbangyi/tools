@@ -137,8 +137,8 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                     _indices = [row[0] for row in _cursor2.fetchall()]
                     # print(f"\nIndices for table '{table}':", _indices)
                     indices[f'{db}-{schema}-{table}'] = sorted(_indices)
-                    if str(table) == 'contract_payer_royalty_metrics':
-                        print(_indices)
+                    # if str(table) == 'contract_payer_royalty_metrics':
+                    #     print(_indices)
 
             _cursor2.close()
             conn.close()

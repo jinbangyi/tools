@@ -63,6 +63,7 @@ def get_mysql_info(connection_string: str, ignored_db: list[str]):
             tables = inspector.get_table_names(schema=database)
             r_tables[database] = sorted(tables)
             for table in tables:
+                print(inspector.get_table_options(table))
                 r_indices[f'{database}-{table}'] = sorted(inspector.get_indexes(table, schema=database), key=lambda item: item['name'])
 
             # Use the connection to execute queries
