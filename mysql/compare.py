@@ -55,6 +55,7 @@ def get_mysql_info(connection_string: str, ignored_db: list[str]):
     r_databases = {}
     r_tables = {}
     r_indices = {}
+    r_table_count = {}
     try:
         # Get all databases
         databases = list(filter(lambda item: item not in ignored_db, inspector.get_schema_names()))
@@ -64,7 +65,16 @@ def get_mysql_info(connection_string: str, ignored_db: list[str]):
             r_tables[database] = sorted(tables)
             for table in tables:
                 print(inspector.get_table_options(table, schema=database))
-                r_indices[f'{database}-{table}'] = sorted(inspector.get_indexes(table, schema=database), key=lambda item: item['name'])
+                r_indices[f'{database}-{table}'] = sorted(inspector.get_indexes(table, schema=database),
+                                                          key=lambda item: item['name'])
+                with connection.begin():
+                    # Get the size of each database
+                    size_query = text(f"SELECT count(*) AS 'size'"
+                                      f"FROM {table}")
+                    result = connection.execute(size_query).fetchall()
+                    print(result)
+                    count = int(result[0][0])
+                    r_table_count[f'{database}-{table}'] = count
 
             # Use the connection to execute queries
             with connection.begin():
