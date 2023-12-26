@@ -70,7 +70,7 @@ def get_mysql_info(connection_string: str, ignored_db: list[str]):
                 with connection.begin():
                     # Get the size of each database
                     size_query = text(f"SELECT count(*) AS 'size'"
-                                      f"FROM {table}")
+                                      f"FROM {database}.{table}")
                     result = connection.execute(size_query).fetchall()
                     print(result)
                     count = int(result[0][0])
