@@ -16,7 +16,7 @@ TARGET=mongodb://$CREDENTIAL@pricing-prod5.cluster-c2xpm1yjdga8.ap-southeast-1.d
 python3 mongodb/compare.py "$SOURCE" "$TARGET"
 
 
-
+# overwrite collection data of a special time range
 SOURCE=mongodb+srv://$CREDENTIAL@prod.ibu3n.mongodb.net
 TARGET=mongodb+srv://$CREDENTIAL@data-farmer.ibu3n.mongodb.net
-python3 mongodb/compare.py "$SOURCE" "$TARGET" --collection=
+python3 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=

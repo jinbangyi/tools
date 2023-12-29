@@ -17,11 +17,10 @@ def migrate(source: Database, target: Database, collection: str, start_date: dat
     logger.debug(query)
     # source get data
     documents_to_transfer = source[collection].find(query)
-    print(len(list(documents_to_transfer)))
-    exit(1)
+    # print(len(list(documents_to_transfer)))
 
     # target delete data
-    res = source[collection].delete_many(query)
+    res = target[collection].delete_many(query)
     logger.info(f'delete={res.deleted_count}')
 
     buffer = []
