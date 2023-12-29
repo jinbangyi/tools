@@ -14,3 +14,9 @@ SOURCE=mongodb://$CREDENTIAL@bot-prod.cluster-cono0v2vbnhv.ap-southeast-1.docdb.
 TARGET=mongodb://$CREDENTIAL@pricing-prod5.cluster-c2xpm1yjdga8.ap-southeast-1.docdb.amazonaws.com:27017
 
 python3 mongodb/compare.py "$SOURCE" "$TARGET"
+
+
+
+SOURCE=mongodb+srv://$CREDENTIAL@prod.ibu3n.mongodb.net
+TARGET=mongodb+srv://$CREDENTIAL@data-farmer.ibu3n.mongodb.net
+python3 mongodb/compare.py "$SOURCE" "$TARGET" --collection=
