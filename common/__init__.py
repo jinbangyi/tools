@@ -18,14 +18,26 @@ def log(msg: str, obj, pretty: bool = False):
         exit_code += 1
 
 
-def size_compare(source: dict, target: dict, gap: int):
+def size_compare(source: dict, target: dict, gap: int, op='gt'):
+    """
+    :param source:
+    :param target:
+    :param gap:
+    :param op: [gt, lt]
+    :return:
+    """
     new_source = {}
     new_target = {}
     for k in source.keys():
         if k in target:
-            if abs(source.get(k) - target.get(k)) > gap:
-                new_source[k] = source.get(k)
-                new_target[k] = target.get(k)
+            if op == 'gt':
+                if abs(source.get(k) - target.get(k)) > gap:
+                    new_source[k] = source.get(k)
+                    new_target[k] = target.get(k)
+            else:
+                if abs(source.get(k) - target.get(k)) < gap:
+                    new_source[k] = source.get(k)
+                    new_target[k] = target.get(k)
         else:
             new_source[k] = source.get(k)
 

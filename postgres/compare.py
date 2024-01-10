@@ -31,7 +31,7 @@ def start(source: str, target: str, level: str):
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
         t_databases,
-        1024 * 1024 * 1024 * 10
+        1024 * 1024 * 100
     )), pretty=True)
 
     log('db-schema-diff', DeepDiff(
@@ -47,13 +47,14 @@ def start(source: str, target: str, level: str):
     log('db-table-size-diff', DeepDiff(*size_compare(
         s_tables_size,
         t_tables_size,
-        1024 * 1024 * 1024
+        1024 * 1024 * 10
     )), pretty=True)
 
     log('db-table-count-diff', DeepDiff(*size_compare(
         s_tables_count,
         t_tables_count,
-        10
+        gap=0,
+        op='lt'
     )), pretty=True)
 
     log('db-indices-diff', DeepDiff(
@@ -132,8 +133,8 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                         WHERE schemaname='public' AND relname = '{table}'
                     """
                     _cursor2.execute(query)
-                    table_count = _cursor2.fetchone()[2]
-                    tables_count[f'{db}-{schema}-{table}'] = table_count
+                    table_count = _cursor2.fetchone()[0]
+                    tables_count[f'{db}-{schema}-{table}'] = int(table_count)
 
             _cursor2.close()
             conn.close()
