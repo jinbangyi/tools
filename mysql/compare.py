@@ -28,7 +28,7 @@ def start(source: str, target: str, level: str):
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
         t_databases,
-        1024 * 1024 * 1024 * 10
+        1024 * 1024 * 1024
     )), pretty=True)
 
     log('db-table-diff', DeepDiff(
