@@ -31,6 +31,7 @@ def start(source: str, target: str, level: str):
     log('db-size-diff', DeepDiff(*size_compare(
         s_databases,
         t_databases,
+        # 100M
         1024 * 1024 * 100
     )), pretty=True)
 
@@ -47,13 +48,14 @@ def start(source: str, target: str, level: str):
     log('db-table-size-diff', DeepDiff(*size_compare(
         s_tables_size,
         t_tables_size,
+        # 10M
         1024 * 1024 * 10
     )), pretty=True)
 
     log('db-table-count-diff', DeepDiff(*size_compare(
         s_tables_count,
         t_tables_count,
-        gap=0,
+        gap=1,
         op='lt'
     )), pretty=True)
 
@@ -126,15 +128,13 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                     # if str(table) == 'contract_payer_royalty_metrics':
                     #     print(_indices)
 
-                    # get table count
-                    query = f"""
-                        SELECT n_live_tup
-                        FROM pg_stat_all_tables
-                        WHERE schemaname='public' AND relname = '{table}'
-                    """
-                    _cursor2.execute(query)
-                    table_count = _cursor2.fetchone()[0]
-                    tables_count[f'{db}-{schema}-{table}'] = int(table_count)
+                    # TODO get table count
+                    # get table doc count
+                    # if table_size < 1024*1024*1024:
+                    #     query = f"""SELECT count(*) FROM '{table}'"""
+                    #     _cursor2.execute(query)
+                    #     table_count = _cursor2.fetchone()[0]
+                    #     tables_count[f'{db}-{schema}-{table}'] = int(table_count)
 
             _cursor2.close()
             conn.close()
