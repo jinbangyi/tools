@@ -7,37 +7,9 @@ import psycopg2
 from deepdiff import DeepDiff
 from loguru import logger
 
+from common import size_compare, log
+
 exit_code = 0
-
-
-def log(msg: str, obj, pretty: bool = False):
-    global exit_code
-    if obj:
-        if pretty:
-            for k, v in obj['values_changed'].items():
-                v['new_value'] = round(v['new_value'] / pow(1024, 3), 2)
-                v['old_value'] = round(v['old_value'] / pow(1024, 3), 2)
-                v['delta'] = round(abs(v['new_value'] - v['old_value']), 2)
-        # if pretty == 'bytes':
-        #     obj = obj / pow(1024, 3)
-        logger.info(f'{msg}: {obj}G')
-        exit_code += 1
-
-
-def size_compare(source: dict, target: dict, gap: int):
-    new_source = {}
-    new_target = {}
-    for k in source.keys():
-        if k in target:
-            if abs(source.get(k) - target.get(k)) > gap:
-                new_source[k] = source.get(k)
-                new_target[k] = target.get(k)
-        else:
-            new_source[k] = source.get(k)
-
-    [new_target.setdefault(i, target.get(i)) for i in set(target.keys()) - set(source.keys())]
-
-    return new_source, new_target
 
 
 @click.command()
@@ -51,8 +23,8 @@ def start(source: str, target: str, level: str):
     logger.add(sys.stderr, level=level.upper(), backtrace=False, diagnose=False)
     ignored_db = ['postgres', 'template0', 'template1', 'rdsadmin']
 
-    s_databases, s_schemas, s_tables, s_tables_size, s_indices = get_postgresql_info(source, ignored_db=ignored_db)
-    t_databases, t_schemas, t_tables, t_tables_size, t_indices = get_postgresql_info(target, ignored_db=ignored_db)
+    s_databases, s_schemas, s_tables, s_tables_size, s_indices, s_tables_count = get_postgresql_info(source, ignored_db=ignored_db)
+    t_databases, t_schemas, t_tables, t_tables_size, t_indices, t_tables_count = get_postgresql_info(target, ignored_db=ignored_db)
     # logger.debug(f'{s_databases}, {s_schemas}, {s_tables}, {s_tables_size}, {s_indices}')
     # logger.debug(f'{t_databases}, {t_schemas}, {t_tables}, {t_tables_size}, {t_indices}')
 
@@ -78,6 +50,12 @@ def start(source: str, target: str, level: str):
         1024 * 1024 * 1024
     )), pretty=True)
 
+    log('db-table-count-diff', DeepDiff(*size_compare(
+        s_tables_count,
+        t_tables_count,
+        10
+    )), pretty=True)
+
     log('db-indices-diff', DeepDiff(
         s_indices,
         t_indices,
@@ -89,11 +67,18 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
     conn = psycopg2.connect(conn_str)
     _cursor = conn.cursor()
 
+    # db name and size
     databases = {}
+    # db name and schemas
     schemas = {}
+    # db-name_db-schema and tables
     tables = {}
+    # db-name_schema_table and size
     tables_size = {}
-    indices = {}
+    # db-name_schema_table and count
+    tables_count = {}
+    # db-name_schema_table and index
+    tables_indices = {}
     try:
         # Get all databases
         _cursor.execute("SELECT datname FROM pg_database")
@@ -136,9 +121,19 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
                         f"SELECT indexname FROM pg_indexes WHERE schemaname = '{schema}' AND tablename = '{table}'")
                     _indices = [row[0] for row in _cursor2.fetchall()]
                     # print(f"\nIndices for table '{table}':", _indices)
-                    indices[f'{db}-{schema}-{table}'] = sorted(_indices)
+                    tables_indices[f'{db}-{schema}-{table}'] = sorted(_indices)
                     # if str(table) == 'contract_payer_royalty_metrics':
                     #     print(_indices)
+
+                    # get table count
+                    query = f"""
+                        SELECT n_live_tup
+                        FROM pg_stat_all_tables
+                        WHERE schemaname='public' AND relname = '{table}'
+                    """
+                    _cursor2.execute(query)
+                    table_count = _cursor2.fetchone()[2]
+                    tables_count[f'{db}-{schema}-{table}'] = table_count
 
             _cursor2.close()
             conn.close()
@@ -148,7 +143,7 @@ def get_postgresql_info(conn_str: str, ignored_db: list[str] = None):
         # conn.close()
         pass
 
-    return databases, schemas, tables, tables_size, indices
+    return databases, schemas, tables, tables_size, tables_indices, tables_count
 
 
 if __name__ == "__main__":
