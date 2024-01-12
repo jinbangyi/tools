@@ -26,8 +26,8 @@ export CREDENTIAL=
 # overwrite collection data of a special time range
 SOURCE=mongodb+srv://$READONLY@prod.ibu3n.mongodb.net
 TARGET=mongodb+srv://$CREDENTIAL@data-farmer.ibu3n.mongodb.net
-python3 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceHourRecord
-python3 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceMinuteRecord
-python3 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceByMarketHourRecord
-python3 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceByMarketMinuteRecord
+python3.11 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceHourRecord
+python3.11 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceMinuteRecord
+python3.11 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceByMarketHourRecord
+python3.11 mongodb/overwrite.py "$SOURCE" "$TARGET" --collection=ContractFloorPriceByMarketMinuteRecord
 
