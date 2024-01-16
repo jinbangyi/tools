@@ -27,7 +27,7 @@ def migrate(source: Database, target: Database, collection: str, start_date: dat
     i = 0
     # Transfer documents to cluster B
     for document in documents_to_transfer:
-        if len(buffer) > 1000:
+        if len(buffer) > 10000:
             logger.debug(f'insert batch {i}')
             target[collection].insert_many(buffer)
             buffer.clear()
