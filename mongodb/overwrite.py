@@ -46,8 +46,8 @@ def start(source: str, target: str, db: str, collection: str):
     mongo_source = MongoClient(source)
     mongo_target = MongoClient(target)
 
-    start_date = datetime(2024, 1, 11, 3, tzinfo=UTC)  # Modify this as needed
-    end_date = datetime(2024, 1, 12, 4, tzinfo=UTC)  # Modify this as needed
+    start_date = datetime(2024, 1, 12, 4, tzinfo=UTC)
+    end_date = datetime(2024, 1, 16, 7, tzinfo=UTC)
 
     migrate(mongo_source.get_database(db), mongo_target.get_database(db), collection, start_date, end_date)
 
